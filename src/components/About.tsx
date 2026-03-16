@@ -3,7 +3,36 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 
-export function About() {
+// Fallback values
+const FALLBACK = {
+    title: "Behind the Sound",
+    subtitle: "THE PRODUCER",
+    bio: [
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate.",
+        "Velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium.",
+    ],
+    quote: "Sound is not just heard; it is felt. It is the invisible architecture of emotion.",
+    profileImage: "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&q=80&w=1200",
+};
+
+interface AboutProps {
+    title?: string;
+    subtitle?: string;
+    bio?: string;
+    quote?: string;
+    profileImageUrl?: string;
+}
+
+export function About({
+    title = FALLBACK.title,
+    subtitle = FALLBACK.subtitle,
+    bio,
+    quote = FALLBACK.quote,
+    profileImageUrl = FALLBACK.profileImage,
+}: AboutProps) {
+    // Split CMS bio (single string) into paragraphs, or use fallback array
+    const bioParagraphs = bio ? bio.split("\n\n").filter(Boolean) : FALLBACK.bio;
+
     return (
         <section className="py-24 px-6 md:px-12 max-w-7xl mx-auto" id="about">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-24 items-center">
@@ -17,7 +46,7 @@ export function About() {
                     className="relative w-full aspect-[4/5] rounded-2xl overflow-hidden shadow-2xl group"
                 >
                     <Image
-                        src="https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&q=80&w=1200" // A black and white studio portrait placeholder
+                        src={profileImageUrl}
                         alt="Producer Portrait"
                         fill
                         className="object-cover transition-transform duration-700 group-hover:scale-105"
@@ -39,28 +68,21 @@ export function About() {
                     className="flex flex-col justify-center"
                 >
                     <div className="inline-block text-accent font-mono text-sm tracking-widest uppercase mb-4">
-                        Behind the Sound
+                        {title}
                     </div>
                     <h2 className="text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter mb-8 text-foreground group-hover:text-accent transition-colors">
-                        THE PRODUCER
+                        {subtitle}
                     </h2>
 
                     <div className="space-y-6 text-foreground-muted leading-relaxed text-lg">
-                        <p>
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod
-                            tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
-                            veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
-                            commodo consequat. Duis aute irure dolor in reprehenderit in voluptate.
-                        </p>
-                        <p>
-                            Velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat
-                            cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id
-                            est laborum. Sed ut perspiciatis unde omnis iste natus error sit voluptatem
-                            accusantium doloremque laudantium.
-                        </p>
-                        <p className="border-l-2 border-accent pl-6 italic text-foreground/80 mt-8 font-serif">
-                            &quot;Sound is not just heard; it is felt. It is the invisible architecture of emotion.&quot;
-                        </p>
+                        {bioParagraphs.map((paragraph, i) => (
+                            <p key={i}>{paragraph}</p>
+                        ))}
+                        {quote && (
+                            <p className="border-l-2 border-accent pl-6 italic text-foreground/80 mt-8 font-serif">
+                                &quot;{quote}&quot;
+                            </p>
+                        )}
                     </div>
                 </motion.div>
 

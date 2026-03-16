@@ -3,7 +3,11 @@
 import { motion } from "framer-motion";
 import { TidalDynamicGrid } from "@/components/TidalDynamicGrid";
 
-export function Discography() {
+interface DiscographyProps {
+    trackIds?: string[];
+}
+
+export function Discography({ trackIds }: DiscographyProps) {
     return (
         <section className="py-24 px-6 md:px-12 max-w-7xl mx-auto" id="discography">
             <motion.h2
@@ -15,7 +19,8 @@ export function Discography() {
                 Selected Works
             </motion.h2>
 
-            <TidalDynamicGrid />
+            <TidalDynamicGrid trackIds={trackIds} />
         </section>
     );
 }
+

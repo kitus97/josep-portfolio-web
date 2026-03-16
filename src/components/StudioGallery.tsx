@@ -5,14 +5,24 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { X } from "lucide-react";
 
-const studioImages = [
-    { id: 1, src: "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&q=80&w=1200", alt: "Large mixing console in a studio" }, // Mixing Console
-    { id: 2, src: "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&q=80&w=1200", alt: "Studio monitor speakers" }, // Monitor Speakers
-    { id: 3, src: "https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&q=80&w=1200", alt: "Artist in a recording booth" }, // Recording Booth
-    { id: 4, src: "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?auto=format&fit=crop&q=80&w=1200", alt: "Vintage synthesizer close up" }, // Synthesizer
+// Fallback images
+const FALLBACK_IMAGES = [
+    { src: "https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?auto=format&fit=crop&q=80&w=1200", alt: "Large mixing console in a studio" },
+    { src: "https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&q=80&w=1200", alt: "Studio monitor speakers" },
+    { src: "https://images.unsplash.com/photo-1557672172-298e090bd0f1?auto=format&fit=crop&q=80&w=1200", alt: "Artist in a recording booth" },
+    { src: "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?auto=format&fit=crop&q=80&w=1200", alt: "Vintage synthesizer close up" },
 ];
 
-export function StudioGallery() {
+interface StudioImage {
+    src: string;
+    alt: string;
+}
+
+interface StudioGalleryProps {
+    images?: StudioImage[];
+}
+
+export function StudioGallery({ images = FALLBACK_IMAGES }: StudioGalleryProps) {
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
     // Lock body scroll when modal is open
@@ -38,9 +48,9 @@ export function StudioGallery() {
 
             {/* Horizontal Scroll Snap Container for Mobile -> Grid for Desktop */}
             <div className="flex overflow-x-auto snap-x snap-mandatory gap-4 md:gap-6 pb-8 md:grid md:grid-cols-4 md:snap-none md:overflow-visible no-scrollbar px-6 max-w-7xl mx-auto -mx-6 md:mx-auto">
-                {studioImages.map((img, i) => (
+                {images.map((img, i) => (
                     <motion.div
-                        key={img.id}
+                        key={i}
                         initial={{ opacity: 0, y: 30 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true, margin: "-50px" }}
@@ -95,7 +105,7 @@ export function StudioGallery() {
                             exit={{ scale: 0.9, opacity: 0 }}
                             transition={{ type: "spring", damping: 25, stiffness: 300 }}
                             className="relative w-full max-w-6xl aspect-video md:aspect-auto md:h-[85vh] rounded-2xl overflow-hidden shadow-2xl shadow-accent/20 cursor-default"
-                            onClick={(e) => e.stopPropagation()} // Prevent click from closing when clicking the image itself
+                            onClick={(e) => e.stopPropagation()}
                         >
                             <Image
                                 src={selectedImage}
