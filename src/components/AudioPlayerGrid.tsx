@@ -11,10 +11,10 @@ type AudioPlayerGridProps = {
 };
 
 function buildLoopTracks(input: Track[]) {
-    if (input.length >= 8) return input;
+    if (input.length >= 5) return input;
     const out: Track[] = [];
-    while (out.length < 8) out.push(...input);
-    return out.slice(0, 8);
+    while (out.length < 5) out.push(...input);
+    return out.slice(0, 5);
 }
 
 export function AudioPlayerGrid({ tracks = [] }: AudioPlayerGridProps) {
