@@ -2,6 +2,7 @@ import { Hero } from "@/components/Hero";
 import { About } from "@/components/About";
 import { StudioGallery } from "@/components/StudioGallery";
 import { Discography } from "@/components/Discography";
+import { PlaylistsSection } from "@/components/PlaylistsSection";
 import { Footer } from "@/components/Footer";
 import { getAboutSection, getWorkspaceGallery, getTrackList } from "@/lib/sanity.queries";
 import { urlFor } from "@/lib/sanity.client";
@@ -38,7 +39,8 @@ export default async function Home() {
         profileImageUrl={profileImageUrl}
       />
       <StudioGallery images={galleryImages} />
-      <Discography trackIds={trackData?.tracks} />
+      <Discography tracks={trackData?.tracks} />
+      <PlaylistsSection />
       <Footer />
     </main>
   );

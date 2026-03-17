@@ -1,10 +1,19 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from 'react';
-import type { Track } from './data';
-import { tracks } from './data';
+import React, {
+    createContext,
+    useCallback,
+    useContext,
+    useMemo,
+    useRef,
+    useState,
+    type SyntheticEvent,
+} from "react";
+import ReactPlayer from "react-player";
+import type { Track } from "./sanity.queries";
 
 interface AudioContextType {
+    queue: Track[];
     currentTrack: Track | null;
     isPlaying: boolean;
     progress: number;
@@ -12,126 +21,152 @@ interface AudioContextType {
     volume: number;
     playTrack: (track: Track) => void;
     togglePlayPause: () => void;
+    seek: (seconds: number) => void;
     skipForward: () => void;
     skipBackward: () => void;
-    seek: (value: number) => void;
     setVolume: (value: number) => void;
-    audioRef: React.RefObject<HTMLAudioElement | null>;
+    setQueue: (tracks: Track[]) => void;
 }
 
 const AudioContext = createContext<AudioContextType | undefined>(undefined);
 
 export function AudioProvider({ children }: { children: React.ReactNode }) {
+    const playerRef = useRef<HTMLVideoElement>(null);
+    const [queue, setQueueState] = useState<Track[]>([]);
     const [currentTrack, setCurrentTrack] = useState<Track | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [progress, setProgress] = useState(0);
     const [duration, setDuration] = useState(0);
     const [volume, setVolumeState] = useState(1);
-    const audioRef = useRef<HTMLAudioElement | null>(null);
-
-    useEffect(() => {
-        if (audioRef.current) {
-            audioRef.current.volume = volume;
-        }
-    }, [volume]);
 
     const togglePlayPause = useCallback(() => {
-        if (!audioRef.current || !currentTrack) return;
-
-        if (isPlaying) {
-            audioRef.current.pause();
-        } else {
-            audioRef.current.play();
-        }
-        setIsPlaying(prev => !prev);
-    }, [currentTrack, isPlaying]);
+        if (!currentTrack?.audioUrl) return;
+        setIsPlaying((prev) => !prev);
+    }, [currentTrack?.audioUrl]);
 
     const playTrack = useCallback((track: Track) => {
-        if (currentTrack?.id === track.id) {
-            togglePlayPause();
-        } else {
-            setCurrentTrack(track);
-            setIsPlaying(true);
+        if (!track.audioUrl) return;
+        if (currentTrack?._id === track._id) {
+            setIsPlaying((prev) => !prev);
+            return;
         }
-    }, [currentTrack, togglePlayPause]);
+        setCurrentTrack(track);
+        setProgress(0);
+        setDuration(0);
+        setIsPlaying(true);
+    }, [currentTrack?._id]);
+
+    const setQueue = useCallback((tracks: Track[]) => {
+        const filtered = tracks.filter((t) => Boolean(t.audioUrl));
+        setQueueState(filtered);
+    }, []);
+
+    const currentIndex = useMemo(() => {
+        if (!currentTrack) return -1;
+        return queue.findIndex((t) => t._id === currentTrack._id);
+    }, [currentTrack, queue]);
 
     const skipForward = useCallback(() => {
-        if (!currentTrack) return;
-        const currentIndex = tracks.findIndex(t => t.id === currentTrack.id);
-        const nextIndex = (currentIndex + 1) % tracks.length;
-        playTrack(tracks[nextIndex]);
-    }, [currentTrack, playTrack]);
+        if (queue.length === 0) return;
+        const nextIndex = currentIndex >= 0 ? (currentIndex + 1) % queue.length : 0;
+        const next = queue[nextIndex];
+        if (next) playTrack(next);
+    }, [currentIndex, playTrack, queue]);
 
     const skipBackward = useCallback(() => {
-        if (!currentTrack) return;
-        const currentIndex = tracks.findIndex(t => t.id === currentTrack.id);
-        const prevIndex = (currentIndex - 1 + tracks.length) % tracks.length;
-        playTrack(tracks[prevIndex]);
-    }, [currentTrack, playTrack]);
+        if (queue.length === 0) return;
+        const prevIndex =
+            currentIndex >= 0 ? (currentIndex - 1 + queue.length) % queue.length : 0;
+        const prev = queue[prevIndex];
+        if (prev) playTrack(prev);
+    }, [currentIndex, playTrack, queue]);
 
-    const seek = useCallback((value: number) => {
-        if (audioRef.current) {
-            audioRef.current.currentTime = value;
-            setProgress(value);
+    const seek = useCallback((seconds: number) => {
+        const max = Number.isFinite(duration) && duration > 0 ? duration : Infinity;
+        const clamped = Math.max(0, Math.min(seconds, max));
+        if (playerRef.current && Number.isFinite(clamped)) {
+            playerRef.current.currentTime = clamped;
         }
-    }, []);
+        if (Number.isFinite(clamped)) setProgress(clamped);
+    }, [duration]);
 
     const setVolume = useCallback((value: number) => {
-        setVolumeState(value);
-        if (audioRef.current) {
-            audioRef.current.volume = value;
-        }
+        const next = Math.max(0, Math.min(1, value));
+        setVolumeState(next);
     }, []);
 
-    useEffect(() => {
-        const audio = audioRef.current;
-        if (!audio) return;
+    const handleTimeUpdate = useCallback((e: SyntheticEvent<HTMLVideoElement>) => {
+        const t = e.currentTarget.currentTime;
+        if (Number.isFinite(t)) setProgress(t);
+    }, []);
 
-        const updateProgress = () => setProgress(audio.currentTime);
-        const updateDuration = () => setDuration(audio.duration);
-        const handleEnded = () => {
-            skipForward();
-        };
+    const handleDurationChange = useCallback((e: SyntheticEvent<HTMLVideoElement>) => {
+        const d = e.currentTarget.duration;
+        if (Number.isFinite(d)) setDuration(d);
+    }, []);
 
-        audio.addEventListener('timeupdate', updateProgress);
-        audio.addEventListener('loadedmetadata', updateDuration);
-        audio.addEventListener('ended', handleEnded);
+    const handleLoadedMetadata = useCallback((e: SyntheticEvent<HTMLVideoElement>) => {
+        const d = e.currentTarget.duration;
+        if (Number.isFinite(d)) setDuration(d);
+    }, []);
 
-        return () => {
-            audio.removeEventListener('timeupdate', updateProgress);
-            audio.removeEventListener('loadedmetadata', updateDuration);
-            audio.removeEventListener('ended', handleEnded);
-        };
-    }, [currentTrack, skipForward]);
+    const handleEnded = useCallback(() => {
+        if (queue.length > 0) skipForward();
+        else setIsPlaying(false);
+    }, [queue.length, skipForward]);
 
-    // Handle auto-play when track changes
-    useEffect(() => {
-        if (audioRef.current && currentTrack) {
-            audioRef.current.src = currentTrack.audioUrl;
-            if (isPlaying) {
-                audioRef.current.play().catch(console.error);
-            }
-        }
-    }, [currentTrack, isPlaying]);
-
+    const ctxValue = useMemo<AudioContextType>(() => ({
+        queue,
+        currentTrack,
+        isPlaying,
+        progress,
+        duration,
+        volume,
+        playTrack,
+        togglePlayPause,
+        seek,
+        skipForward,
+        skipBackward,
+        setVolume,
+        setQueue,
+    }), [
+        currentTrack,
+        duration,
+        isPlaying,
+        playTrack,
+        progress,
+        queue,
+        seek,
+        setQueue,
+        setVolume,
+        skipBackward,
+        skipForward,
+        togglePlayPause,
+        volume,
+    ]);
 
     return (
-        <AudioContext.Provider value={{
-            currentTrack,
-            isPlaying,
-            progress,
-            duration,
-            volume,
-            playTrack,
-            togglePlayPause,
-            skipForward,
-            skipBackward,
-            seek,
-            setVolume,
-            audioRef
-        }}>
+        <AudioContext.Provider value={ctxValue}>
             {children}
-            <audio ref={audioRef} />
+            <ReactPlayer
+                ref={playerRef}
+                src={currentTrack?.audioUrl}
+                playing={Boolean(currentTrack?.audioUrl) && isPlaying}
+                volume={volume}
+                height={0}
+                width={0}
+                style={{ display: "none" }}
+                onPlay={() => setIsPlaying(true)}
+                onPause={() => setIsPlaying(false)}
+                onEnded={handleEnded}
+                onTimeUpdate={handleTimeUpdate}
+                onDurationChange={handleDurationChange}
+                onLoadedMetadata={handleLoadedMetadata}
+                onError={() => {
+                    console.error("ReactPlayer error", currentTrack?.audioUrl);
+                    setIsPlaying(false);
+                }}
+            />
         </AudioContext.Provider>
     );
 }
@@ -139,7 +174,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
 export const useAudio = () => {
     const context = useContext(AudioContext);
     if (context === undefined) {
-        throw new Error('useAudio must be used within an AudioProvider');
+        throw new Error("useAudio must be used within an AudioProvider");
     }
     return context;
 };

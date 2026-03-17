@@ -35,7 +35,6 @@ export function StudioGallery({ images = FALLBACK_IMAGES }: StudioGalleryProps) 
         <section className="py-24 bg-background">
             <div className="max-w-7xl mx-auto mb-12 px-6 md:px-12">
                 <h2 className="text-3xl md:text-5xl font-black tracking-tight uppercase">Studio Vibe</h2>
-                <p className="text-sm font-mono text-accent mt-2 tracking-widest uppercase">The Workspace</p>
             </div>
 
             {/* Carousel Container */}

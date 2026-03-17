@@ -1,5 +1,18 @@
 import { sanityClient } from "./sanity.client";
 
+export type Track = {
+    _id: string;
+    title: string;
+    artist: string;
+    coverArtUrl?: string;
+    audioUrl?: string;
+    authorComment?: string;
+};
+
+export type TrackList = {
+    tracks: Track[];
+};
+
 // --- About Section ---
 const aboutSectionQuery = `*[_type == "aboutSection"][0]{
   title,
@@ -29,10 +42,17 @@ export async function getWorkspaceGallery() {
 
 // --- Track List ---
 const trackListQuery = `*[_type == "trackList"][0]{
-  tracks
+  tracks[]->{
+    _id,
+    title,
+    artist,
+    authorComment,
+    "coverArtUrl": coverArt.asset->url,
+    "audioUrl": audioFile.asset->url
+  }
 }`;
 
-export async function getTrackList() {
+export async function getTrackList(): Promise<TrackList | null> {
     if (!sanityClient) return null;
     return sanityClient.fetch(trackListQuery);
 }

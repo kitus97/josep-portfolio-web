@@ -7,15 +7,20 @@ export const trackList = defineType({
     fields: [
         defineField({
             name: "tracks",
-            title: "Tidal Track IDs",
+            title: "Tracks",
             type: "array",
-            of: [{ type: "string" }],
-            description: "Paste Tidal Track IDs here (e.g. 501330996)",
+            of: [
+                {
+                    type: "reference",
+                    to: [{ type: "track" }],
+                },
+            ],
+            description: "Ordered list for Selected Works carousel.",
         }),
     ],
     preview: {
         prepare() {
-            return { title: "Tidal Tracks" };
+            return { title: "Selected Works" };
         },
     },
 });

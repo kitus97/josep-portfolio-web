@@ -1,13 +1,14 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { TidalDynamicGrid } from "@/components/TidalDynamicGrid";
+import type { Track } from "@/lib/sanity.queries";
+import { AudioPlayerGrid } from "@/components/AudioPlayerGrid";
 
 interface DiscographyProps {
-    trackIds?: string[];
+    tracks?: Track[];
 }
 
-export function Discography({ trackIds }: DiscographyProps) {
+export function Discography({ tracks }: DiscographyProps) {
     return (
         <section className="py-24 px-6 md:px-12 max-w-7xl mx-auto" id="discography">
             <motion.h2
@@ -19,7 +20,7 @@ export function Discography({ trackIds }: DiscographyProps) {
                 Selected Works
             </motion.h2>
 
-            <TidalDynamicGrid trackIds={trackIds} />
+            <AudioPlayerGrid tracks={tracks} />
         </section>
     );
 }

@@ -8,9 +8,9 @@ export function Hero() {
         const target = document.getElementById("discography");
         if (target) {
             target.scrollIntoView({ behavior: "smooth", block: "start" });
-            // Fire highlight event after scroll settles
+            // Trigger first track playback after scroll settles
             setTimeout(() => {
-                window.dispatchEvent(new CustomEvent("highlight-first-track"));
+                window.dispatchEvent(new CustomEvent("play-first-track"));
             }, 800);
         }
     };
@@ -27,7 +27,7 @@ export function Hero() {
                     transition={{ duration: 0.8, ease: "easeOut" }}
                     className="text-5xl md:text-7xl lg:text-9xl font-black tracking-tighter"
                 >
-                    JOSEP
+                    Josep “Jep” Escurriola
                 </motion.h1>
                 <motion.p
                     initial={{ opacity: 0, y: 20 }}
@@ -35,7 +35,7 @@ export function Hero() {
                     transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
                     className="mt-4 text-foreground-muted text-sm md:text-xl font-mono tracking-widest uppercase"
                 >
-                    Sound Architect / Producer
+                    Mix Engineer
                 </motion.p>
 
                 <motion.div
