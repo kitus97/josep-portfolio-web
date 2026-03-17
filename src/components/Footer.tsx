@@ -22,7 +22,7 @@ export function Footer() {
                     </a>
                 </div>
 
-                <div className="flex flex-col sm:flex-row items-center gap-3">
+                <div className="flex flex-col items-center gap-3">
                     <div className="flex items-center gap-3 border border-surface-light text-foreground px-8 py-4 rounded-full text-sm font-bold uppercase tracking-wider bg-surface/30 select-text">
                         <Phone className="w-4 h-4" />
                         <span className="font-mono tracking-normal normal-case">{contactPhone}</span>
