@@ -10,6 +10,7 @@ export function Footer() {
                     <h3 className="text-3xl font-black tracking-tighter">Jep</h3>
                     <p className="text-sm text-foreground-muted mt-2 font-mono uppercase tracking-wider">Mix Engineer</p>
                     <p className="text-xs text-foreground-muted/50 mt-4">© {new Date().getFullYear()} All rights reserved.</p>
+                    <p className="text-xs text-foreground-muted/50 mt-4">Developed by <a href="https://www.linkedin.com/in/marc-rams-estrada/" className="text-foreground-muted hover:text-accent hover:scale-110 transition-all">Marc Rams Estrada</a>.</p>
                 </div>
 
                 <div className="flex gap-8">
