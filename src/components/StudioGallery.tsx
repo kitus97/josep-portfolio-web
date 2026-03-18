@@ -20,7 +20,10 @@ interface StudioGalleryProps { images?: StudioImage[]; }
 export function StudioGallery({ images = FALLBACK_IMAGES }: StudioGalleryProps) {
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-    // Configuració Embla amb Autoplay
+    const loopImages = images.length > 0 && images.length < 6
+        ? [...images, ...images]
+        : images;
+
     const [emblaRef] = useEmblaCarousel({ loop: true, dragFree: true }, [
         Autoplay({ delay: 4000, stopOnInteraction: false })
     ]);
@@ -40,7 +43,7 @@ export function StudioGallery({ images = FALLBACK_IMAGES }: StudioGalleryProps) 
             {/* Carousel Container */}
             <div className="overflow-hidden cursor-grab active:cursor-grabbing" ref={emblaRef}>
                 <div className="flex -ml-4">
-                    {images.map((img, i) => (
+                    {loopImages.map((img, i) => (
                         <div key={i} className="flex-[0_0_70%] sm:flex-[0_0_45%] md:flex-[0_0_30%] pl-4 min-w-0">
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
