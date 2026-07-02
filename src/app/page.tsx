@@ -7,6 +7,10 @@ import { Footer } from "@/components/Footer";
 import { getAboutSection, getWorkspaceGallery, getTrackList } from "@/lib/sanity.queries";
 import { urlFor } from "@/lib/sanity.client";
 
+// ISR: Next regenera la pàgina com a molt cada 60s en producció.
+// El webhook de Sanity (/api/revalidate) força la regeneració immediata en publicar.
+export const revalidate = 60;
+
 export default async function Home() {
   // Fetch CMS data (returns null if CMS is empty / not configured yet)
   const [aboutData, galleryData, trackData] = await Promise.all([
